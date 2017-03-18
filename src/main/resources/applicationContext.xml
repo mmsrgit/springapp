@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:cxfCore="http://cxf.apache.org/core"
+	xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+	xmlns:sec="http://cxf.apache.org/configuration/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd 
+	   http://camel.apache.org/schema/spring 
+	   http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://camel.apache.org/schema/cxf 
+       http://camel.apache.org/schema/cxf/camel-cxf.xsd 
+       http://cxf.apache.org/core 
+       http://cxf.apache.org/schemas/core.xsd 
+       http://cxf.apache.org/transports/http/configuration 
+       http://cxf.apache.org/schemas/configuration/http-conf.xsd 
+       http://cxf.apache.org/configuration/security 
+       http://cxf.apache.org/schemas/configuration/security.xsd">
+
+
+	<bean id="messageSvc" class="org.home.spring.springapp.MessageServiceImpl" />
+
+	<bean id="renderMessage" class="org.home.spring.springapp.RenderMessage">
+		<property name="service" ref="messageSvc"></property>
+	</bean>
+
+
+	<cxf:cxfEndpoint id="retrieveCountries"
+		address="http://www.webservicex.com/globalweather.asmx" wsdlURL="http://www.webservicex.com/globalweather.asmx?wsdl"
+		serviceClass="net.webservicex.GlobalWeather" endpointName="ws:GlobalWeatherSoap"
+		serviceName="ws:GlobalWeather" xmlns:ws="http://www.webserviceX.NET">
+
+		<cxf:properties>
+			<entry key="dataFormat" value="MESSAGE" />
+		</cxf:properties>
+		<cxf:features>
+			<cxfCore:logging />
+		</cxf:features>
+
+	</cxf:cxfEndpoint>
+
+
+	<camelContext id="countryCamelContext" trace="true"
+		xmlns="http://camel.apache.org/schema/spring">
+		<jmxAgent id="agent" disabled="true" />
+		<route>
+			<from uri="direct:retrieveCountriesWsCall" id="retrieveCountriesWsCall" />
+			<to uri="cxf:bean:retrieveCountries" />
+		</route>
+	</camelContext>
+
+
+</beans>
